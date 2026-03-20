@@ -1,0 +1,230 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: "Inter", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+  --radius-4xl: calc(var(--radius) + 16px);
+}
+
+:root {
+  --radius: 0.625rem;
+
+  /* LATEX-LABS warm brown/orange dark theme */
+  --background: #2B2A27;
+  --foreground: #E8E5E0;
+  --card: #232220;
+  --card-foreground: #E8E5E0;
+  --popover: #232220;
+  --popover-foreground: #E8E5E0;
+  --primary: #D97757;
+  --primary-foreground: #FFFFFF;
+  --secondary: #333130;
+  --secondary-foreground: #E8E5E0;
+  --muted: #333130;
+  --muted-foreground: #8B8680;
+  --accent: #3D3B38;
+  --accent-foreground: #E8E5E0;
+  --destructive: #D4564A;
+  --border: #3A3835;
+  --input: #3A3835;
+  --ring: #D97757;
+  --chart-1: #D97757;
+  --chart-2: #4BA67C;
+  --chart-3: #C9963A;
+  --chart-4: #E49578;
+  --chart-5: #5C5955;
+  --sidebar: #1A1915;
+  --sidebar-foreground: #E8E5E0;
+  --sidebar-primary: #D97757;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: #232220;
+  --sidebar-accent-foreground: #E8E5E0;
+  --sidebar-border: #32302D;
+  --sidebar-ring: #D97757;
+
+  /* LATEX-LABS specific variables */
+  --bg-editor: #1E1D1B;
+  --bg-tertiary: #1A1915;
+  --accent-glow: rgba(217, 119, 87, 0.08);
+  --accent-light: #E49578;
+  --accent-muted: #C4694D;
+  --surface-hover: #3D3B38;
+  --success: #4BA67C;
+  --warning: #C9963A;
+  --text-tertiary: #5C5955;
+  --border-subtle: #32302D;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    @apply overscroll-y-none scroll-smooth;
+    /* macOS overlay titlebar inset — traffic lights safe area */
+    --titlebar-height: 18px;
+    --traffic-light-width: 70px;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* Global scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #3A3835;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #5C5955;
+}
+
+/* Sidebar scrollbar styling */
+.bg-sidebar ::-webkit-scrollbar {
+  width: 6px;
+}
+
+.bg-sidebar ::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.bg-sidebar ::-webkit-scrollbar-thumb {
+  background: var(--sidebar-border);
+  border-radius: 3px;
+}
+
+.bg-sidebar ::-webkit-scrollbar-thumb:hover {
+  background: var(--sidebar-ring);
+}
+
+.bg-sidebar {
+  scrollbar-width: thin;
+  scrollbar-color: var(--sidebar-border) transparent;
+}
+
+.bg-sidebar * {
+  scrollbar-width: thin;
+  scrollbar-color: var(--sidebar-border) transparent;
+}
+
+/* CodeMirror theme overrides */
+.cm-editor {
+  height: 100%;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13.5px;
+}
+
+.cm-editor .cm-content {
+  padding: 12px;
+}
+
+.cm-editor .cm-gutters {
+  background: var(--bg-editor);
+  border-right: 1px solid var(--border-subtle);
+  color: var(--text-tertiary);
+  font-size: 12px;
+}
+
+.cm-editor .cm-activeLineGutter {
+  background: var(--secondary);
+}
+
+.cm-editor .cm-activeLine {
+  background: rgba(217, 119, 87, 0.03);
+}
+
+/* Animations */
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(217, 119, 87, 0.1);
+  }
+  50% {
+    box-shadow: 0 0 20px 4px rgba(217, 119, 87, 0.06);
+  }
+}
+
+.glow-pulse {
+  animation: pulse-glow 3s ease-in-out infinite;
+}
+
+/* MuPDF text selection layer */
+.mupdf-text-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: auto;
+}
+
+.mupdf-text-layer text {
+  fill: transparent;
+  white-space: pre;
+  cursor: text;
+}
+
+.mupdf-text-layer text::selection {
+  fill: hsla(220, 100%, 50%, 0.3);
+}
+
+/* MuPDF link overlay layer */
+.mupdf-link-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.mupdf-link-layer a {
+  position: absolute;
+  pointer-events: auto;
+  cursor: pointer;
+}
