@@ -1,12 +1,12 @@
 <p align="center">
-  <img src="./apps/desktop/src-tauri/icons/icon.png" width="120" height="120" alt="LATEX-LABS" />
+  <img src="./apps/desktop/src-tauri/icons/icon.png" width="100" height="100" alt="LATEX-LABS" />
 </p>
 
 <h1 align="center">LATEX-LABS v2</h1>
 
 <p align="center">
-  A local-first AI LaTeX IDE for scientific writing.<br/>
-  Compile offline. Edit with Claude Code or Codex CLI. Run Python. All from your desktop.
+  <strong>The open-source desktop IDE that puts AI, LaTeX, and your research in one place.</strong><br/>
+  Local-first. Dual AI (Claude + Codex). 100+ scientific skills. Offline compilation.
 </p>
 
 <p align="center">
@@ -17,7 +17,7 @@
 </p>
 
 <p align="center">
-  <img src="./assets/demo/main.webp" alt="LATEX-LABS v2" width="800" />
+  <img src="./assets/demo/intro.gif" alt="LATEX-LABS v2 — AI-Powered Scientific Writing" width="800" />
 </p>
 
 <p align="center">
@@ -45,11 +45,9 @@
 
 ---
 
-## What is LATEX-LABS?
+## Why LATEX-LABS?
 
-LATEX-LABS is a desktop application that combines a LaTeX editor, live PDF preview, dual AI assistants, and a Python environment into a single workspace. It integrates both **Claude Code CLI** (Anthropic) and **Codex CLI** (OpenAI) as interchangeable AI backends — switch between them mid-session from the same chat interface. Your files stay on your machine. Compilation happens offline. AI features send prompts to Anthropic or OpenAI APIs for inference when you invoke them.
-
-### Compared to cloud-based alternatives
+Most LaTeX tools make you choose: cloud convenience **or** local control. LATEX-LABS gives you both — a polished desktop IDE with two interchangeable AI assistants, live compilation, and deep scientific domain knowledge. Your files never leave your machine. AI features call Anthropic or OpenAI APIs only when you invoke them.
 
 | | Cloud LaTeX tools | LATEX-LABS |
 |---|:---:|:---:|
@@ -57,7 +55,7 @@ LATEX-LABS is a desktop application that combines a LaTeX editor, live PDF previ
 | Compilation | Cloud | **Local (Tectonic, offline)** |
 | AI Models | Single provider | **Claude (Opus / Sonnet / Haiku) + Codex (o3 / o4-mini / GPT-4.1)** |
 | Python | Not available | **Built-in uv + venv** |
-| Scientific Skills | Not available | **100+ domain skills** |
+| Scientific Skills | Not available | **100+ domain skill packs** |
 | Version Control | Cloud-managed | **Local Git history with diffs** |
 | Source | Proprietary | **Open source (MIT)** |
 
@@ -65,52 +63,46 @@ LATEX-LABS is a desktop application that combines a LaTeX editor, live PDF previ
 
 ## Features
 
-### Editor
+### Editor + Live PDF Preview
 
-CodeMirror 6 with LaTeX and BibTeX syntax highlighting, real-time error linting, regex find & replace, multi-file project support, and auto-save.
-
-### Live PDF Preview
-
-Native MuPDF rendering with SyncTeX — click anywhere in the PDF to jump to the corresponding source line. Supports zoom, text selection, and region capture.
+CodeMirror 6 with LaTeX/BibTeX syntax highlighting, real-time error linting, and auto-save. The PDF panel renders via native MuPDF with **SyncTeX** — click anywhere in the PDF to jump to the corresponding source line, and vice versa. Supports zoom, text selection, and multiple compilation engines (Tectonic, pdflatex, xelatex, lualatex).
 
 <p align="center">
-  <img src="./assets/demo/main.webp" alt="Editor and PDF Preview" width="700" />
+  <img src="./assets/demo/editor-pdf.gif" alt="Editor and Live PDF Preview with SyncTeX" width="700" />
 </p>
+
+---
 
 ### Dual AI Backend — Claude Code + Codex
 
-LATEX-LABS ships with two AI providers you can switch between at any time:
+Switch between **two AI providers** mid-session from the same chat interface:
 
 | Provider | CLI | Models |
 |----------|-----|--------|
-| **Anthropic** | Claude Code CLI | Opus, Sonnet, Haiku (with adjustable reasoning effort) |
+| **Anthropic** | Claude Code CLI | Opus, Sonnet, Haiku (adjustable reasoning effort) |
 | **OpenAI** | Codex CLI | o3, o4-mini, GPT-4.1 |
 
-Both providers share the same chat interface. They can edit your files, run shell commands, and search your project. Persistent sessions carry context across interactions. When the AI suggests edits, changes appear in a proposed changes panel with visual diffs — accept or reject each chunk individually, or apply/undo all at once with `Cmd+Y` / `Cmd+N`.
+Both can edit your files, run shell commands, and search your project. Pin files with `@file:path` syntax for context. When the AI suggests edits, a **proposed changes panel** shows visual diffs — accept or reject each chunk, or use `⌘Y` / `⌘N` to apply/undo all at once. Token usage and cost are tracked per message.
 
 <p align="center">
-  <img src="./assets/demo/claudecommand.webp" alt="Claude AI Assistant" width="600" />
+  <img src="./assets/demo/ai-chat.gif" alt="Dual AI Chat with Proposed Changes" width="700" />
 </p>
+
+---
 
 ### Capture & Ask
 
-Press `Cmd+X` to enter capture mode. Drag to select any region in the PDF — the screenshot is pinned to the chat composer so you can ask the AI about equations, figures, tables, or reviewer comments.
+Press **`⌘X`** to enter capture mode. Drag to select any region in the PDF — the screenshot is pinned to the chat so you can ask the AI about equations, figures, tables, or reviewer comments. Five vision modes: **Equation**, **Table**, **Figure**, **Algorithm**, and **OCR**.
 
 <p align="center">
-  <img src="./assets/demo/capture_ask.webp" alt="Capture and Ask" width="700" />
+  <img src="./assets/demo/capture-ask.gif" alt="Capture & Ask — PDF to LaTeX" width="700" />
 </p>
 
-### Python Environment
-
-One-click [uv](https://docs.astral.sh/uv/) installation and project-level virtual environment setup. Both Claude Code and Codex automatically use the `.venv` when running Python, so you can generate plots, run analysis scripts, and process data without leaving the app.
-
-<p align="center">
-  <img src="./assets/demo/python.webp" alt="Python Environment" width="600" />
-</p>
+---
 
 ### 100+ Scientific Skills
 
-Install domain-specific skill packs that give the AI deep knowledge in specialized fields:
+Install domain-specific skill packs that give the AI deep, specialized knowledge:
 
 | Domain | Examples |
 |--------|----------|
@@ -121,40 +113,57 @@ Install domain-specific skill packs that give the AI deep knowledge in specializ
 | Clinical Research | ClinicalTrials.gov, ClinVar, DrugBank, FDA |
 | Scientific Communication | Literature Review, Grant Writing, Citation Management |
 
-Skills are installed globally (`~/.claude/skills/`) or per-project and loaded automatically when relevant.
+Skills install globally (`~/.claude/skills/`) or per-project and load automatically when relevant.
 
 <p align="center">
-  <img src="./assets/demo/scientific.webp" alt="Scientific Skills" width="700" />
+  <img src="./assets/demo/skills.gif" alt="100+ Scientific Skills" width="700" />
 </p>
 
-### Project Templates
-
-Pick from paper, thesis, presentation, poster, letter, and other templates. Optionally describe what you're writing and let AI generate the initial structure. Drag & drop PDFs, BIB files, and images as references.
-
-<p align="center">
-  <img src="./assets/demo/starter.webp" alt="Templates and Project Wizard" width="700" />
-</p>
+---
 
 ### History & Version Control
 
-Every save creates a Git snapshot in `.latexlabs/history.git/`. Label important checkpoints, browse diffs between any two versions, and restore previous states.
+Every save creates a Git snapshot in `.latexlabs/history.git/`. Label important checkpoints, browse diffs between any two versions, and restore previous states — all without touching `git` yourself. Snapshot types include auto-save, manual, compile, and before-Claude markers.
 
 <p align="center">
-  <img src="./assets/demo/history.webp" alt="History and Diffs" width="700" />
+  <img src="./assets/demo/history.gif" alt="History and Version Control" width="700" />
 </p>
 
-### More
+---
 
-- **Zotero Integration** — OAuth-based bibliography management and citation insertion
-- **ArXiv Search** — Search and browse papers directly in the app
-- **Vision Panel** — Analyze images with AI (equations, tables, figures, OCR)
-- **Slash Commands** — Built-in (`/review`, `/init`) + custom commands from `.claude/commands/`
-- **External Editors** — Open projects in VS Code, Cursor, Zed, or Sublime Text
-- **Dark / Light Theme** — Automatic or manual switching
+### Python Environment
+
+One-click [uv](https://docs.astral.sh/uv/) installation and project-level virtual environment setup. Both Claude Code and Codex automatically use `.venv` when running Python — generate plots, run analysis scripts, and process data without leaving the app.
 
 <p align="center">
-  <img src="./assets/demo/zotero.webp" alt="Zotero Integration" width="300" />
+  <img src="./assets/demo/python.webp" alt="Python Environment" width="600" />
 </p>
+
+---
+
+### Project Templates
+
+Pick from **paper, thesis, presentation, poster, letter, book, report, and CV** templates. Optionally describe what you're writing and let AI generate the initial structure. Drag & drop PDFs, BIB files, and images as references.
+
+<p align="center">
+  <img src="./assets/demo/starter.webp" alt="Project Templates" width="700" />
+</p>
+
+---
+
+### And More
+
+| Feature | Description |
+|---------|-------------|
+| **Zotero Integration** | OAuth-based bibliography management — browse collections, import to BibTeX, insert `\cite{}` |
+| **ArXiv Search** | Search papers, preview abstracts, generate BibTeX, download sources |
+| **Vision Panel** | Analyze images with AI — equations, tables, figures, OCR |
+| **Chart Generation** | Convert `\begin{tabular}` data into bar, line, scatter, pie, or heatmap charts via AI |
+| **Template Transfer** | AI-powered format conversion between LaTeX templates |
+| **Collaboration** | WebSocket-based real-time session sharing with invite links |
+| **Slash Commands** | Built-in (`/review`, `/init`) + custom commands from `.claude/commands/` |
+| **External Editors** | Open projects in VS Code, Cursor, Zed, or Sublime Text |
+| **Dark / Light Theme** | Automatic or manual switching |
 
 ---
 
@@ -163,12 +172,12 @@ Every save creates a Git snapshot in `.latexlabs/history.git/`. Label important 
 | Layer | Technology |
 |-------|-----------|
 | Framework | Tauri 2 (Rust backend) |
-| Frontend | React 19, TypeScript, Vite |
+| Frontend | React 19, TypeScript, Vite 6 |
 | Editor | CodeMirror 6 |
 | PDF | MuPDF (native) + SyncTeX |
-| State | Zustand |
+| State | Zustand 5 |
 | Styling | Tailwind CSS 4 |
-| LaTeX | Tectonic / pdflatex / xelatex |
+| LaTeX | Tectonic / pdflatex / xelatex / lualatex |
 | Version Control | libgit2 (via git2-rs) |
 | AI (Anthropic) | Claude Code CLI |
 | AI (OpenAI) | Codex CLI |
@@ -179,10 +188,10 @@ Every save creates a Git snapshot in `.latexlabs/history.git/`. Label important 
 
 ## Getting Started
 
-1. Download the installer for your platform from [Releases](https://github.com/warpirate/latex-labs-v2/releases)
-2. Launch LATEX-LABS and create or open a project
-3. Install [Claude Code CLI](https://docs.anthropic.com/en/docs/claude-code) and/or [Codex CLI](https://github.com/openai/codex) to enable AI features
-4. Start writing
+1. **Download** the installer for your platform from [Releases](https://github.com/warpirate/latex-labs-v2/releases)
+2. **Launch** LATEX-LABS and create or open a project
+3. **Install AI** — [Claude Code CLI](https://docs.anthropic.com/en/docs/claude-code) and/or [Codex CLI](https://github.com/openai/codex) to enable AI features
+4. **Start writing** — the editor, PDF preview, and AI are ready
 
 ### Building from Source
 
@@ -193,13 +202,13 @@ pnpm install
 pnpm dev:desktop
 ```
 
-Requires: Node.js, pnpm, Rust toolchain, and [Tauri prerequisites](https://v2.tauri.app/start/prerequisites/).
+Requires: Node.js 18+, pnpm, Rust toolchain, and [Tauri prerequisites](https://v2.tauri.app/start/prerequisites/).
 
 ---
 
 ## Data & Privacy
 
-LATEX-LABS stores and compiles everything locally. Nothing is uploaded for storage. When you use AI features, prompts and file contents are sent to Anthropic's API (or OpenAI for Codex) for inference. See [Claude Code data usage](https://code.claude.com/docs/en/data-usage) for retention policies.
+LATEX-LABS stores and compiles everything locally. Nothing is uploaded for storage. When you use AI features, prompts and file contents are sent to Anthropic or OpenAI APIs for inference. See [Claude Code data usage](https://code.claude.com/docs/en/data-usage) for retention policies.
 
 ---
 

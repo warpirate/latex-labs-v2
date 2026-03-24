@@ -97,3 +97,6 @@ build/
 reference_pr
 reference_pr_claude
 external-libs/
+
+# Remotion intro-gif project (build tool, not needed in repo)
+apps/intro-gif/
