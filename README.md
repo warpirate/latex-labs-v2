@@ -2,11 +2,11 @@
   <img src="./apps/desktop/src-tauri/icons/icon.png" width="120" height="120" alt="LATEX-LABS" />
 </p>
 
-<h1 align="center">LATEX-LABS</h1>
+<h1 align="center">LATEX-LABS v2</h1>
 
 <p align="center">
-  An offline-first scientific writing workspace powered by Claude.<br/>
-  LaTeX + Python + 100+ scientific skills — runs on your desktop.
+  A local-first AI LaTeX IDE for scientific writing.<br/>
+  Compile offline. Edit with Claude. Run Python. All from your desktop.
 </p>
 
 <p align="center">
@@ -17,144 +17,192 @@
 </p>
 
 <p align="center">
-  <img src="./assets/demo/main.webp" alt="LATEX-LABS Demo" width="800" />
+  <img src="./assets/demo/main.webp" alt="LATEX-LABS v2" width="800" />
 </p>
 
 <p align="center">
   <a href="https://github.com/warpirate/latex-labs-v2/releases/latest/download/LATEX-LABS-macOS.dmg">
-    <img src="https://img.shields.io/badge/Download-macOS_(Apple_Silicon)-black?style=for-the-badge&logo=apple&logoColor=white" alt="Download for macOS (Apple Silicon)" />
+    <img src="https://img.shields.io/badge/macOS_(Apple_Silicon)-black?style=for-the-badge&logo=apple&logoColor=white" alt="macOS Apple Silicon" />
   </a>&nbsp;
   <a href="https://github.com/warpirate/latex-labs-v2/releases/latest/download/LATEX-LABS-macOS-Intel.dmg">
-    <img src="https://img.shields.io/badge/Download-macOS_(Intel)-555555?style=for-the-badge&logo=apple&logoColor=white" alt="Download for macOS (Intel)" />
+    <img src="https://img.shields.io/badge/macOS_(Intel)-555555?style=for-the-badge&logo=apple&logoColor=white" alt="macOS Intel" />
   </a>&nbsp;
   <a href="https://github.com/warpirate/latex-labs-v2/releases/latest/download/LATEX-LABS-Windows-setup.exe">
-    <img src="https://img.shields.io/badge/Download-Windows-0078D4?style=for-the-badge&logo=windows&logoColor=white" alt="Download for Windows" />
+    <img src="https://img.shields.io/badge/Windows-0078D4?style=for-the-badge&logo=windows&logoColor=white" alt="Windows" />
   </a>&nbsp;
   <a href="https://github.com/warpirate/latex-labs-v2/releases/latest/download/LATEX-LABS-Linux.AppImage">
-    <img src="https://img.shields.io/badge/Download-Linux_(AppImage)-FCC624?style=for-the-badge&logo=linux&logoColor=black" alt="Download for Linux" />
+    <img src="https://img.shields.io/badge/Linux-FCC624?style=for-the-badge&logo=linux&logoColor=black" alt="Linux" />
   </a>
 </p>
+
 <p align="center">
   <a href="https://github.com/warpirate/latex-labs-v2/releases">
-    <img src="https://img.shields.io/github/v/release/delibae/latex-labs?style=flat-square&label=Latest%20Release&color=green" alt="Latest Release" />
+    <img src="https://img.shields.io/github/v/release/warpirate/latex-labs-v2?style=flat-square&label=Latest&color=green" alt="Latest Release" />
   </a>
+  <img src="https://img.shields.io/badge/license-MIT-blue?style=flat-square" alt="MIT License" />
+  <img src="https://img.shields.io/badge/platform-macOS%20%7C%20Windows%20%7C%20Linux-lightgrey?style=flat-square" alt="Platform" />
 </p>
 
 ---
 
-## Why LATEX-LABS?
+## What is LATEX-LABS?
 
-[OpenAI Prism](https://openai.com/prism/) is a cloud-based LaTeX workspace — all your files and data must be uploaded to OpenAI's servers to use it.
+LATEX-LABS is a desktop application that combines a LaTeX editor, live PDF preview, AI assistant, and Python environment into a single workspace. Your files stay on your machine. Compilation happens offline. AI features use the Anthropic API for inference when you choose to invoke them.
 
-LATEX-LABS is a **local-first** alternative — your files are stored on your disk, compiled offline, and edited locally. AI features require sending content to Anthropic's API for inference (see [data usage](https://code.claude.com/docs/en/data-usage)).
+### Compared to cloud-based alternatives
 
-| | OpenAI Prism | LATEX-LABS |
+| | Cloud LaTeX tools | LATEX-LABS |
 |---|:---:|:---:|
-| AI Model | GPT-5.2 | **Claude Opus / Sonnet / Haiku** |
-| Runtime | Browser (cloud) | **Native desktop (Tauri 2 + Rust)** |
-| LaTeX | Cloud compilation | **Tectonic (embedded, offline)** |
-| Python Environment | — | **Built-in uv + venv — one-click scientific Python setup** |
-| Scientific Skills | — | **100+ domain skills (bioinformatics, cheminformatics, ML, ...)** |
-| Getting Started | Account setup required | **Install and go — template gallery + project wizard** |
-| Version Control | — | **Git-based history with labels & diff** |
-| Source Code | Proprietary | **Open source (MIT)** |
-
-### Data & Privacy
-
-LATEX-LABS stores and compiles your documents locally — nothing is uploaded to a remote server for storage. However, when you use AI features, **prompts and file contents that Claude reads are sent to Anthropic's API for inference**, just like any cloud-based LLM tool. See [Claude Code data usage](https://code.claude.com/docs/en/data-usage) for retention policies and opt-out options.
+| Where files live | Their servers | **Your disk** |
+| Compilation | Cloud | **Local (Tectonic, offline)** |
+| AI Models | Single provider | **Claude Opus / Sonnet / Haiku + Codex** |
+| Python | Not available | **Built-in uv + venv** |
+| Scientific Skills | Not available | **100+ domain skills** |
+| Version Control | Cloud-managed | **Local Git history with diffs** |
+| Source | Proprietary | **Open source (MIT)** |
 
 ---
 
 ## Features
 
-### Python Environment (uv)
-LATEX-LABS integrates [uv](https://docs.astral.sh/uv/) — the fast Python package manager — directly into the app. One click to install uv, one click to create a project-level virtual environment. Claude Code automatically uses the `.venv` when running Python code, so you can generate plots, run analysis scripts, and process data without leaving the editor.
+### Editor
+
+CodeMirror 6 with LaTeX and BibTeX syntax highlighting, real-time error linting, regex find & replace, multi-file project support, and auto-save.
+
+### Live PDF Preview
+
+Native MuPDF rendering with SyncTeX — click anywhere in the PDF to jump to the corresponding source line. Supports zoom, text selection, and region capture.
+
+<p align="center">
+  <img src="./assets/demo/main.webp" alt="Editor and PDF Preview" width="700" />
+</p>
+
+### AI Assistant
+
+Chat with Claude directly in the editor. Switch between Sonnet, Opus, and Haiku models with adjustable reasoning effort. Claude can edit your files, run shell commands, and search your project. Persistent sessions carry context across interactions.
+
+When Claude suggests edits, changes appear in a proposed changes panel with visual diffs. Accept or reject each chunk individually, or apply/undo all at once with `Cmd+Y` / `Cmd+N`.
+
+<p align="center">
+  <img src="./assets/demo/claudecommand.webp" alt="Claude AI Assistant" width="600" />
+</p>
+
+### Capture & Ask
+
+Press `Cmd+X` to enter capture mode. Drag to select any region in the PDF — the screenshot is pinned to the chat composer so you can ask Claude about equations, figures, tables, or reviewer comments.
+
+<p align="center">
+  <img src="./assets/demo/capture_ask.webp" alt="Capture and Ask" width="700" />
+</p>
+
+### Python Environment
+
+One-click [uv](https://docs.astral.sh/uv/) installation and project-level virtual environment setup. Claude automatically uses the `.venv` when running Python, so you can generate plots, run analysis scripts, and process data without leaving the app.
 
 <p align="center">
   <img src="./assets/demo/python.webp" alt="Python Environment" width="600" />
 </p>
 
 ### 100+ Scientific Skills
-Browse and install domain-specific skills from [K-Dense Scientific Skills](https://github.com/K-Dense-AI/claude-scientific-skills) — curated prompts and tool configurations that give Claude deep knowledge in specialized fields:
 
-| Domain | Skills |
-|--------|--------|
-| **Bioinformatics & Genomics** | Scanpy, BioPython, PyDESeq2, PySAM, gget, AnnData, ... |
-| **Cheminformatics & Drug Discovery** | RDKit, DeepChem, DiffDock, PubChem, ChEMBL, ... |
-| **Data Analysis & Visualization** | Matplotlib, Seaborn, Plotly, Polars, scikit-learn, ... |
-| **Machine Learning & AI** | PyTorch Lightning, Transformers, SHAP, UMAP, PyMC, ... |
-| **Clinical Research** | ClinicalTrials.gov, ClinVar, DrugBank, FDA, ... |
-| **Scientific Communication** | Literature Review, Grant Writing, Citation Management, ... |
-| **Multi-omics & Systems Biology** | scvi-tools, COBRApy, Reactome, Bioservices, ... |
-| **And more** | Materials Science, Lab Automation, Proteomics, Physics, ... |
+Install domain-specific skill packs that give Claude deep knowledge in specialized fields:
 
-Skills are installed globally (`~/.claude/skills/`) or per-project, and Claude automatically loads them when relevant.
+| Domain | Examples |
+|--------|----------|
+| Bioinformatics & Genomics | Scanpy, BioPython, PyDESeq2, PySAM, gget, AnnData |
+| Cheminformatics & Drug Discovery | RDKit, DeepChem, DiffDock, PubChem, ChEMBL |
+| Data Analysis & Visualization | Matplotlib, Seaborn, Plotly, Polars, scikit-learn |
+| Machine Learning & AI | PyTorch Lightning, Transformers, SHAP, UMAP, PyMC |
+| Clinical Research | ClinicalTrials.gov, ClinVar, DrugBank, FDA |
+| Scientific Communication | Literature Review, Grant Writing, Citation Management |
+
+Skills are installed globally (`~/.claude/skills/`) or per-project. Claude loads them automatically when relevant.
 
 <p align="center">
   <img src="./assets/demo/scientific.webp" alt="Scientific Skills" width="700" />
 </p>
 
-### Quick Start with Templates & Project Wizard
-Pick a template (paper, thesis, presentation, poster, letter, etc.), give it a name, optionally describe what you're writing — LATEX-LABS sets up the project and generates initial content with AI. Drag & drop reference files (PDF, BIB, images) and start writing immediately.
+### Project Templates
+
+Pick from paper, thesis, presentation, poster, letter, and other templates. Optionally describe what you're writing and let AI generate the initial structure. Drag & drop PDFs, BIB files, and images as references.
 
 <p align="center">
-  <img src="./assets/demo/starter.webp" alt="Template Gallery & Project Wizard" width="700" />
+  <img src="./assets/demo/starter.webp" alt="Templates and Project Wizard" width="700" />
 </p>
 
-### Claude AI Assistant
-Chat with Claude directly in the editor. Select between Sonnet, Opus, Haiku models with adjustable reasoning effort levels. Persistent sessions, tool use (file edit, bash, search), and extensible slash commands.
+### History & Version Control
+
+Every save creates a Git snapshot in `.latexlabs/history.git/`. Label important checkpoints, browse diffs between any two versions, and restore previous states.
 
 <p align="center">
-  <img src="./assets/demo/claudecommand.webp" alt="Claude AI Assistant & Slash Commands" width="600" />
+  <img src="./assets/demo/history.webp" alt="History and Diffs" width="700" />
 </p>
-
-### History & Proposed Changes
-Every save creates a snapshot in a local Git repository (`.latexlabs/history.git/`). Label important checkpoints, browse diffs between any two snapshots, and restore previous versions. When Claude suggests edits, changes appear in a dedicated panel with visual diffs — accept or reject per chunk, or apply/undo all at once (`⌘Y` / `⌘N`).
-
-<p align="center">
-  <img src="./assets/demo/history.webp" alt="History & Proposed Changes" width="700" />
-</p>
-
-### Offline LaTeX Compilation
-Tectonic is embedded directly in the app. Packages are downloaded once on first use and cached locally. After that, compilation works fully offline with no TeX Live installation required.
-
-### Capture & Ask
-Press `⌘X` to enter capture mode, drag to select any region in the PDF — the captured image is pinned to the chat composer so you can immediately ask Claude about it. Great for asking about equations, figures, tables, or reviewer comments.
-
-<p align="center">
-  <img src="./assets/demo/capture_ask.webp" alt="Capture & Ask" width="700" />
-</p>
-
-### Live PDF Preview
-Native MuPDF rendering with SyncTeX support — click a position in the PDF to jump to the corresponding source line. Supports zoom, text selection, and capture.
-
-### Editor
-CodeMirror 6 with LaTeX/BibTeX syntax highlighting, real-time error linting, find & replace (regex), and multi-file project support with auto-save.
 
 ### More
-- **Zotero Integration** — OAuth-based bibliography management and citation insertion.
+
+- **Zotero Integration** — OAuth-based bibliography management and citation insertion
+- **ArXiv Search** — Search and browse papers directly in the app
+- **Vision Panel** — Analyze images with Claude (equations, tables, figures, OCR)
+- **Slash Commands** — Built-in (`/review`, `/init`) + custom commands from `.claude/commands/`
+- **External Editors** — Open projects in VS Code, Cursor, Zed, or Sublime Text
+- **Dark / Light Theme** — Automatic or manual switching
 
 <p align="center">
   <img src="./assets/demo/zotero.webp" alt="Zotero Integration" width="300" />
 </p>
 
-- **Slash Commands** — Built-in (`/review`, `/init`) + custom commands from `.claude/commands/`.
-- **External Editors** — Open projects in Cursor, VS Code, Zed, or Sublime Text.
-- **Dark / Light Theme** — Automatic switching.
+---
+
+## Tech Stack
+
+| Layer | Technology |
+|-------|-----------|
+| Framework | Tauri 2 (Rust backend) |
+| Frontend | React 19, TypeScript, Vite |
+| Editor | CodeMirror 6 |
+| PDF | MuPDF (native) + SyncTeX |
+| State | Zustand |
+| Styling | Tailwind CSS 4 |
+| LaTeX | Tectonic / pdflatex / xelatex |
+| Version Control | libgit2 (via git2-rs) |
+| Python | uv + venv |
+| Monorepo | Turborepo + pnpm |
 
 ---
 
-## Installation
+## Getting Started
 
-Download the latest build from [GitHub Releases](https://github.com/warpirate/latex-labs-v2/releases).
+1. Download the installer for your platform from [Releases](https://github.com/warpirate/latex-labs-v2/releases)
+2. Launch LATEX-LABS and create or open a project
+3. Add your Anthropic API key in settings to enable AI features
+4. Start writing
+
+### Building from Source
+
+```bash
+git clone https://github.com/warpirate/latex-labs-v2.git
+cd latex-labs-v2
+pnpm install
+pnpm dev:desktop
+```
+
+Requires: Node.js, pnpm, Rust toolchain, and [Tauri prerequisites](https://v2.tauri.app/start/prerequisites/).
+
+---
+
+## Data & Privacy
+
+LATEX-LABS stores and compiles everything locally. Nothing is uploaded for storage. When you use AI features, prompts and file contents are sent to Anthropic's API (or OpenAI for Codex) for inference. See [Claude Code data usage](https://code.claude.com/docs/en/data-usage) for retention policies.
+
+---
 
 ## Contributing
 
-Contributions are welcome! See [CONTRIBUTING.md](./CONTRIBUTING.md) for development setup, testing, and guidelines.
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for development setup and guidelines.
 
 ## Acknowledgments
 
-This project is a fork of [LATEX-LABS](https://github.com/delibae/latex-labs) by [delibae](https://github.com/delibae), which was originally built on [Open Prism](https://github.com/assistant-ui/open-prism) by [assistant-ui](https://github.com/assistant-ui).
+Forked from [LATEX-LABS](https://github.com/delibae/latex-labs) by [delibae](https://github.com/delibae), originally built on [Open Prism](https://github.com/assistant-ui/open-prism) by [assistant-ui](https://github.com/assistant-ui).
 
 ## License
 
