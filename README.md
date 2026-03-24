@@ -21,24 +21,21 @@
 </p>
 
 <p align="center">
-  <a href="https://latexlabs.delibae.dev?utm_source=github&utm_medium=readme&utm_campaign=launch_v054">
-    <img src="https://img.shields.io/badge/Website-latexlabs.dev-blue?style=flat-square&logo=googlechrome&logoColor=white" alt="Website" />
-  </a>&nbsp;
-  <a href="https://github.com/delibae/latex-labs/releases/latest/download/LATEX-LABS-macOS.dmg">
+  <a href="https://github.com/warpirate/latex-labs-v2/releases/latest/download/LATEX-LABS-macOS.dmg">
     <img src="https://img.shields.io/badge/Download-macOS_(Apple_Silicon)-black?style=for-the-badge&logo=apple&logoColor=white" alt="Download for macOS (Apple Silicon)" />
   </a>&nbsp;
-  <a href="https://github.com/delibae/latex-labs/releases/latest/download/LATEX-LABS-macOS-Intel.dmg">
+  <a href="https://github.com/warpirate/latex-labs-v2/releases/latest/download/LATEX-LABS-macOS-Intel.dmg">
     <img src="https://img.shields.io/badge/Download-macOS_(Intel)-555555?style=for-the-badge&logo=apple&logoColor=white" alt="Download for macOS (Intel)" />
   </a>&nbsp;
-  <a href="https://github.com/delibae/latex-labs/releases/latest/download/LATEX-LABS-Windows-setup.exe">
+  <a href="https://github.com/warpirate/latex-labs-v2/releases/latest/download/LATEX-LABS-Windows-setup.exe">
     <img src="https://img.shields.io/badge/Download-Windows-0078D4?style=for-the-badge&logo=windows&logoColor=white" alt="Download for Windows" />
   </a>&nbsp;
-  <a href="https://github.com/delibae/latex-labs/releases/latest/download/LATEX-LABS-Linux.AppImage">
+  <a href="https://github.com/warpirate/latex-labs-v2/releases/latest/download/LATEX-LABS-Linux.AppImage">
     <img src="https://img.shields.io/badge/Download-Linux_(AppImage)-FCC624?style=for-the-badge&logo=linux&logoColor=black" alt="Download for Linux" />
   </a>
 </p>
 <p align="center">
-  <a href="https://github.com/delibae/latex-labs/releases">
+  <a href="https://github.com/warpirate/latex-labs-v2/releases">
     <img src="https://img.shields.io/github/v/release/delibae/latex-labs?style=flat-square&label=Latest%20Release&color=green" alt="Latest Release" />
   </a>
 </p>
@@ -149,7 +146,7 @@ CodeMirror 6 with LaTeX/BibTeX syntax highlighting, real-time error linting, fin
 
 ## Installation
 
-Download the latest build from [GitHub Releases](https://github.com/delibae/latex-labs/releases).
+Download the latest build from [GitHub Releases](https://github.com/warpirate/latex-labs-v2/releases).
 
 ## Contributing
 
@@ -157,7 +154,7 @@ Contributions are welcome! See [CONTRIBUTING.md](./CONTRIBUTING.md) for developm
 
 ## Acknowledgments
 
-This project started from [Open Prism](https://github.com/assistant-ui/open-prism) by [assistant-ui](https://github.com/assistant-ui).
+This project is a fork of [LATEX-LABS](https://github.com/delibae/latex-labs) by [delibae](https://github.com/delibae), which was originally built on [Open Prism](https://github.com/assistant-ui/open-prism) by [assistant-ui](https://github.com/assistant-ui).
 
 ## License
 
