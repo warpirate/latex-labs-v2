@@ -221,6 +221,11 @@ interface SkillsStatus {
   location: string;
 }
 
+interface CodexStatus {
+  installed: boolean;
+  version: string | null;
+}
+
 function EnvironmentStatus() {
   const claudeVersion = useClaudeSetupStore((s) => s.version);
   const claudeEmail = useClaudeSetupStore((s) => s.accountEmail);
@@ -231,6 +236,8 @@ function EnvironmentStatus() {
   const checkUv = useUvSetupStore((s) => s.checkStatus);
   const installUv = useUvSetupStore((s) => s.install);
   const _finishUvInstall = useUvSetupStore((s) => s._finishInstall);
+
+  const [codexStatus, setCodexStatus] = useState<CodexStatus | null>(null);
 
   const [skillsStatus, setSkillsStatus] = useState<SkillsStatus | null>(null);
   const [skillsInstalling, _setSkillsInstalling] = useState(false);
@@ -247,10 +254,20 @@ function EnvironmentStatus() {
     }
   }, []);
 
+  const checkCodex = useCallback(async () => {
+    try {
+      const result = await invoke<CodexStatus>("check_codex_status");
+      setCodexStatus(result);
+    } catch {
+      setCodexStatus({ installed: false, version: null });
+    }
+  }, []);
+
   useEffect(() => {
     checkUv();
     checkSkills();
-  }, [checkUv, checkSkills]);
+    checkCodex();
+  }, [checkUv, checkSkills, checkCodex]);
 
   // Listen for uv install completion
   useEffect(() => {
@@ -286,6 +303,19 @@ function EnvironmentStatus() {
           ok={true}
           label="Claude Code"
           detail={[claudeVersion, claudeEmail].filter(Boolean).join(" · ")}
+        />
+
+        {/* Codex CLI */}
+        <StatusRow
+          ok={!!codexStatus?.installed}
+          label="Codex CLI"
+          detail={
+            codexStatus === null
+              ? "Checking..."
+              : codexStatus.installed
+                ? (codexStatus.version ?? "Installed")
+                : "Not installed (optional)"
+          }
         />
 
         {/* Python (uv) */}

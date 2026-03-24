@@ -32,6 +32,8 @@ import { invoke } from "@tauri-apps/api/core";
 import {
   useClaudeChatStore,
   offsetToLineCol,
+  claudeModels,
+  codexModels,
 } from "@/stores/claude-chat-store";
 import { useDocumentStore, type ProjectFile } from "@/stores/document-store";
 import { getUniqueTargetName } from "@/lib/tauri/fs";
@@ -70,10 +72,16 @@ export const ChatComposer: FC<{ isOpen?: boolean }> = ({ isOpen }) => {
   const sendPrompt = useClaudeChatStore((s) => s.sendPrompt);
   const cancelExecution = useClaudeChatStore((s) => s.cancelExecution);
   const isStreaming = useClaudeChatStore((s) => s.isStreaming);
+  const provider = useClaudeChatStore((s) => s.provider);
+  const setProvider = useClaudeChatStore((s) => s.setProvider);
   const selectedModel = useClaudeChatStore((s) => s.selectedModel);
   const setSelectedModel = useClaudeChatStore((s) => s.setSelectedModel);
   const effortLevel = useClaudeChatStore((s) => s.effortLevel);
   const setEffortLevel = useClaudeChatStore((s) => s.setEffortLevel);
+
+  const currentModels = provider === "codex" ? codexModels : claudeModels;
+  const modelDisplayName =
+    currentModels.find((m) => m.id === selectedModel)?.name ?? selectedModel;
   const activeTabId = useClaudeChatStore((s) => s.activeTabId);
   const [input, setInput] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -688,37 +696,37 @@ export const ChatComposer: FC<{ isOpen?: boolean }> = ({ isOpen }) => {
               zIndex: 9999,
             }}
           >
-            {/* Models */}
+            {/* Provider toggle */}
+            <div className="p-2">
+              <div className="px-1 pb-1 font-medium text-muted-foreground text-xs">
+                Provider
+              </div>
+              <div className="flex gap-1">
+                {(["claude", "codex"] as const).map((p) => (
+                  <button
+                    key={p}
+                    className={cn(
+                      "flex-1 rounded-md py-1 text-center font-medium text-xs transition-colors",
+                      provider === p
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-muted text-muted-foreground hover:bg-muted/80",
+                    )}
+                    onClick={() => setProvider(p)}
+                  >
+                    {p === "claude" ? "Claude" : "Codex"}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="border-border border-t" />
+
+            {/* Models — adapts to selected provider */}
             <div className="p-1">
               <div className="px-2 py-1 font-medium text-muted-foreground text-xs">
                 Model
               </div>
-              {[
-                {
-                  id: "sonnet" as const,
-                  name: "Sonnet",
-                  desc: "Fast, efficient for most tasks",
-                  icon: <ZapIcon className="size-3.5" />,
-                },
-                {
-                  id: "opus" as const,
-                  name: "Opus",
-                  desc: "Most capable, complex reasoning",
-                  icon: <SparklesIcon className="size-3.5" />,
-                },
-                {
-                  id: "haiku" as const,
-                  name: "Haiku",
-                  desc: "Fastest, simple tasks",
-                  icon: <RabbitIcon className="size-3.5" />,
-                },
-                {
-                  id: "opusplan" as const,
-                  name: "OpusPlan",
-                  desc: "Opus for planning, Sonnet for execution",
-                  icon: <LayersIcon className="size-3.5" />,
-                },
-              ].map((m) => (
+              {currentModels.map((m) => (
                 <button
                   key={m.id}
                   className={cn(
@@ -729,7 +737,14 @@ export const ChatComposer: FC<{ isOpen?: boolean }> = ({ isOpen }) => {
                   )}
                   onClick={() => setSelectedModel(m.id)}
                 >
-                  {m.icon}
+                  {provider === "claude" ? (
+                    m.id === "sonnet" ? <ZapIcon className="size-3.5" /> :
+                    m.id === "opus" ? <SparklesIcon className="size-3.5" /> :
+                    m.id === "haiku" ? <RabbitIcon className="size-3.5" /> :
+                    <LayersIcon className="size-3.5" />
+                  ) : (
+                    <SparklesIcon className="size-3.5" />
+                  )}
                   <div className="min-w-0 flex-1">
                     <div className="font-medium text-xs">{m.name}</div>
                     <div className="truncate text-muted-foreground text-xs">
@@ -743,39 +758,42 @@ export const ChatComposer: FC<{ isOpen?: boolean }> = ({ isOpen }) => {
               ))}
             </div>
 
-            <div className="border-border border-t" />
-
-            {/* Effort level */}
-            <div className="p-2">
-              <div className="mb-1.5 flex items-center justify-between px-1">
-                <span className="font-medium text-muted-foreground text-xs">
-                  Effort
-                </span>
-                <span className="text-muted-foreground text-xs">
-                  {effortLevel === "low"
-                    ? "Low"
-                    : effortLevel === "medium"
-                      ? "Medium"
-                      : "High"}
-                </span>
-              </div>
-              <div className="flex gap-1">
-                {(["low", "medium", "high"] as const).map((level) => (
-                  <button
-                    key={level}
-                    className={cn(
-                      "flex-1 rounded-md py-1 text-center font-medium text-xs transition-colors",
-                      effortLevel === level
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-muted text-muted-foreground hover:bg-muted/80",
-                    )}
-                    onClick={() => setEffortLevel(level)}
-                  >
-                    {level === "low" ? "L" : level === "medium" ? "M" : "H"}
-                  </button>
-                ))}
-              </div>
-            </div>
+            {/* Effort level — only for Claude provider */}
+            {provider === "claude" && (
+              <>
+                <div className="border-border border-t" />
+                <div className="p-2">
+                  <div className="mb-1.5 flex items-center justify-between px-1">
+                    <span className="font-medium text-muted-foreground text-xs">
+                      Effort
+                    </span>
+                    <span className="text-muted-foreground text-xs">
+                      {effortLevel === "low"
+                        ? "Low"
+                        : effortLevel === "medium"
+                          ? "Medium"
+                          : "High"}
+                    </span>
+                  </div>
+                  <div className="flex gap-1">
+                    {(["low", "medium", "high"] as const).map((level) => (
+                      <button
+                        key={level}
+                        className={cn(
+                          "flex-1 rounded-md py-1 text-center font-medium text-xs transition-colors",
+                          effortLevel === level
+                            ? "bg-primary text-primary-foreground"
+                            : "bg-muted text-muted-foreground hover:bg-muted/80",
+                        )}
+                        onClick={() => setEffortLevel(level)}
+                      >
+                        {level === "low" ? "L" : level === "medium" ? "M" : "H"}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </>
+            )}
           </div>,
           document.body,
         )}
@@ -904,21 +922,17 @@ export const ChatComposer: FC<{ isOpen?: boolean }> = ({ isOpen }) => {
               className="flex items-center gap-1.5 rounded-md px-2 py-1 text-muted-foreground text-xs transition-colors hover:bg-muted hover:text-foreground"
             >
               <span>
-                {selectedModel === "sonnet"
-                  ? "Sonnet"
-                  : selectedModel === "opus"
-                    ? "Opus"
-                    : selectedModel === "haiku"
-                      ? "Haiku"
-                      : "OpusPlan"}
+                {provider === "codex" ? `Codex ${modelDisplayName}` : modelDisplayName}
               </span>
-              <span className="text-muted-foreground/60">
-                {effortLevel === "low"
-                  ? "L"
-                  : effortLevel === "medium"
-                    ? "M"
-                    : "H"}
-              </span>
+              {provider === "claude" && (
+                <span className="text-muted-foreground/60">
+                  {effortLevel === "low"
+                    ? "L"
+                    : effortLevel === "medium"
+                      ? "M"
+                      : "H"}
+                </span>
+              )}
               <ChevronDownIcon className="size-3" />
             </button>
           </div>

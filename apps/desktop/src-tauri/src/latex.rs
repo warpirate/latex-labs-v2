@@ -69,7 +69,7 @@ fn has_real_errors(log: &str) -> bool {
         .any(|l| l.starts_with('!') || l.contains("Error:"))
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 enum TexEngine {
     Latex,
     XeLaTeX,
@@ -218,78 +218,101 @@ fn lower_thread_priority() {
     }
 }
 
-// --- Tectonic Compilation ---
+// --- LaTeX Compilation via System CLI ---
 
-pub(crate) fn compile_with_tectonic(work_dir: &Path, main_file: &str) -> Result<(), String> {
-    use tectonic::config::PersistentConfig;
-    use tectonic::driver::{OutputFormat, PassSetting, ProcessingSessionBuilder};
-    use tectonic::status::NoopStatusBackend;
+/// Compile using the system `tectonic` CLI.
+fn compile_with_tectonic_cli(work_dir: &Path, main_file: &str) -> Result<(), String> {
+    let tectonic_path = which::which("tectonic")
+        .map_err(|_| "Tectonic CLI not found. Install it with: cargo install tectonic")?;
 
-    let mut status = NoopStatusBackend {};
-
-    let config = PersistentConfig::open(false)
-        .map_err(|e| format!("Failed to open tectonic config: {}", e))?;
-
-    let bundle = config.default_bundle(false, &mut status).map_err(|e| {
-        format!(
-            "Failed to load tectonic bundle (check network connection): {}",
-            e
-        )
-    })?;
-
-    let format_cache = config
-        .format_cache_path()
-        .map_err(|e| format!("Failed to get format cache path: {}", e))?;
-
-    let mut builder = ProcessingSessionBuilder::default();
-    builder
-        .bundle(bundle)
-        .primary_input_path(work_dir.join(main_file))
-        .tex_input_name(main_file)
-        .filesystem_root(work_dir)
-        .output_dir(work_dir)
-        .format_name("latex")
-        .format_cache_path(format_cache)
-        .output_format(OutputFormat::Pdf)
-        .pass(PassSetting::Default)
-        .synctex(true)
-        .keep_intermediates(true)
-        .keep_logs(true);
-
-    let mut session = builder
-        .create(&mut status)
-        .map_err(|e| format!("Failed to create tectonic session: {}", e))?;
-
-    session.run(&mut status).map_err(|e| format!("{}", e))?;
-
-    Ok(())
-}
-
-/// Run tectonic compilation in an isolated subprocess.
-///
-/// This avoids the font cache assertion failure (`font_cache.fonts == NULL`)
-/// that occurs when tectonic is called multiple times in the same process.
-/// The C-level static `font_cache` in `dpx-pdffont.c` is not cleaned up
-/// on compilation failure, causing subsequent calls to abort.
-///
-/// By spawning a subprocess, each compilation gets a fresh process with
-/// clean global state, and cleanup happens automatically on process exit.
-fn compile_with_tectonic_subprocess(work_dir: &Path, main_file: &str) -> Result<(), String> {
-    let exe = std::env::current_exe()
-        .map_err(|e| format!("Failed to get current executable path: {}", e))?;
-
-    let output = std::process::Command::new(&exe)
-        .args(["--tectonic-compile", &work_dir.to_string_lossy(), main_file])
+    let output = std::process::Command::new(tectonic_path)
+        .args([
+            "-X", "compile",
+            "--synctex",
+            "--keep-intermediates",
+            "--keep-logs",
+            main_file,
+        ])
+        .current_dir(work_dir)
         .stdout(std::process::Stdio::piped())
         .stderr(std::process::Stdio::piped())
         .output()
-        .map_err(|e| format!("Failed to spawn tectonic subprocess: {}", e))?;
+        .map_err(|e| format!("Failed to run tectonic: {}", e))?;
 
     if output.status.success() {
         Ok(())
     } else {
         let stderr = String::from_utf8_lossy(&output.stderr);
-        Err(stderr.trim().to_string())
+        let stdout = String::from_utf8_lossy(&output.stdout);
+        let msg = if stderr.trim().is_empty() {
+            stdout.trim().to_string()
+        } else {
+            stderr.trim().to_string()
+        };
+        Err(msg)
+    }
+}
+
+/// Compile using pdflatex/xelatex/lualatex from TeX Live or MiKTeX.
+fn compile_with_system_latex(work_dir: &Path, main_file: &str, engine: &str) -> Result<(), String> {
+    let engine_path = which::which(engine)
+        .map_err(|_| format!("{} not found. Install TeX Live or MiKTeX.", engine))?;
+
+    let output = std::process::Command::new(engine_path)
+        .args([
+            "-interaction=nonstopmode",
+            "-synctex=1",
+            main_file,
+        ])
+        .current_dir(work_dir)
+        .stdout(std::process::Stdio::piped())
+        .stderr(std::process::Stdio::piped())
+        .output()
+        .map_err(|e| format!("Failed to run {}: {}", engine, e))?;
+
+    if output.status.success() {
+        Ok(())
+    } else {
+        let stdout = String::from_utf8_lossy(&output.stdout);
+        Err(stdout.trim().to_string())
+    }
+}
+
+/// Try to compile with the best available engine.
+/// Priority: detected engine from magic comment > tectonic > pdflatex > xelatex
+fn compile_with_best_engine(work_dir: &Path, main_file: &str, detected: Option<&TexEngine>) -> Result<(), String> {
+    // If a specific engine is requested via magic comment, try that first
+    if let Some(engine) = detected {
+        match engine {
+            TexEngine::XeLaTeX => {
+                if which::which("xelatex").is_ok() {
+                    return compile_with_system_latex(work_dir, main_file, "xelatex");
+                }
+                // Tectonic is XeTeX-based, so it works as fallback
+            }
+            TexEngine::LuaLaTeX => {
+                if which::which("lualatex").is_ok() {
+                    return compile_with_system_latex(work_dir, main_file, "lualatex");
+                }
+                return Err("LuaLaTeX requested but not found. Install TeX Live or MiKTeX.".to_string());
+            }
+            TexEngine::Latex => {
+                if which::which("pdflatex").is_ok() {
+                    return compile_with_system_latex(work_dir, main_file, "pdflatex");
+                }
+            }
+        }
+    }
+
+    // Default: try tectonic first, then pdflatex
+    if which::which("tectonic").is_ok() {
+        compile_with_tectonic_cli(work_dir, main_file)
+    } else if which::which("pdflatex").is_ok() {
+        compile_with_system_latex(work_dir, main_file, "pdflatex")
+    } else if which::which("xelatex").is_ok() {
+        compile_with_system_latex(work_dir, main_file, "xelatex")
+    } else {
+        Err("No LaTeX engine found. Install Tectonic (cargo install tectonic) or TeX Live.".to_string())
     }
 }
 
@@ -513,33 +536,23 @@ pub async fn compile_latex(
     }
 
     // Detect TeX engine from magic comment
-    if let Ok(content) = std::fs::read_to_string(&main_tex_path) {
-        if let Some(engine) = detect_tex_engine(&content) {
-            if engine == TexEngine::LuaLaTeX {
-                return Err(
-                    "Compilation failed\n\nThis document requires LuaLaTeX (% !TEX program = lualatex), \
-                     which is not supported. Prism uses a XeTeX-based engine (Tectonic). \
-                     Please switch to XeLaTeX or remove the magic comment."
-                        .to_string(),
-                );
-            }
-            // XeLaTeX → native (Tectonic is XeTeX-based), pdflatex → mostly compatible
-        }
-    }
+    let detected_engine = std::fs::read_to_string(&main_tex_path)
+        .ok()
+        .and_then(|content| detect_tex_engine(&content));
 
-    // Run Tectonic in a subprocess to isolate C-level global state (font cache, etc.).
-    // This prevents the font_cache assertion failure on retry after a failed compilation.
+    // Run compilation with the best available engine
     let work_dir_clone = work_dir.clone();
     let main_file_clone = main_file.clone();
+    let detected_clone = detected_engine.clone();
     let compile_result = tokio::task::spawn_blocking(move || {
         lower_thread_priority();
-        compile_with_tectonic_subprocess(&work_dir_clone, &main_file_clone)
+        compile_with_best_engine(&work_dir_clone, &main_file_clone, detected_clone.as_ref())
     })
     .await
     .map_err(|e| format!("Compilation task panicked: {}", e))?;
 
     eprintln!(
-        "[latex] +{:.0}ms tectonic done (ok={})",
+        "[latex] +{:.0}ms compilation done (ok={})",
         t0.elapsed().as_millis(),
         compile_result.is_ok()
     );
@@ -579,7 +592,7 @@ pub async fn compile_latex(
 
         if needs_retry {
             let retry_result = tokio::task::spawn_blocking(move || {
-                compile_with_tectonic_subprocess(&work_dir_clone, &main_file_clone)
+                compile_with_best_engine(&work_dir_clone, &main_file_clone, None)
             })
             .await
             .map_err(|e| format!("Retry task panicked: {}", e))?;

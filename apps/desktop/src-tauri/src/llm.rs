@@ -221,7 +221,7 @@ pub async fn call_vision_llm(
         },
     ];
 
-    call_llm(config, messages, 0.2)
+    call_llm(config, messages, 0.2).await
 }
 
 #[cfg(test)]

@@ -370,54 +370,56 @@ export function useClaudeEvents() {
     // Set up listeners once and keep them alive for the component lifetime.
     // Each listener is added to listenersRef immediately after registration
     // to avoid a race condition where unmount happens mid-setup.
+    // We listen to BOTH claude-* AND codex-* events — both CLIs emit JSONL
+    // in the same format, so they route to the same handlers.
     let cancelled = false;
     (async () => {
-      const unlistenOutput = await listen<ClaudeOutputPayload>(
-        "claude-output",
-        (event) => {
-          if (!cancelled) handleStreamMessage(event.payload);
-        },
-      );
-      if (cancelled) {
-        unlistenOutput();
-        return;
+      // ── Output listeners (claude + codex) ──
+      for (const eventName of ["claude-output", "codex-output"] as const) {
+        const unlisten = await listen<ClaudeOutputPayload>(
+          eventName,
+          (event) => {
+            if (!cancelled) handleStreamMessage(event.payload);
+          },
+        );
+        if (cancelled) { unlisten(); return; }
+        listenersRef.current.push(unlisten);
       }
-      listenersRef.current.push(unlistenOutput);
 
-      const unlistenComplete = await listen<ClaudeCompletePayload>(
-        "claude-complete",
-        (event) => {
-          if (!cancelled) handleComplete(event.payload);
-        },
-      );
-      if (cancelled) {
-        unlistenComplete();
-        return;
+      // ── Complete listeners (claude + codex) ──
+      for (const eventName of ["claude-complete", "codex-complete"] as const) {
+        const unlisten = await listen<ClaudeCompletePayload>(
+          eventName,
+          (event) => {
+            if (!cancelled) handleComplete(event.payload);
+          },
+        );
+        if (cancelled) { unlisten(); return; }
+        listenersRef.current.push(unlisten);
       }
-      listenersRef.current.push(unlistenComplete);
 
-      const unlistenError = await listen<ClaudeErrorPayload>(
-        "claude-error",
-        (event) => {
-          if (!cancelled) {
-            const { tab_id: tabId, data: payload } = event.payload;
-            log.warn(`[${tabId}] stderr: ${payload}`);
-            if (
-              payload.includes("Error") ||
-              payload.includes("error") ||
-              payload.includes("ECONNREFUSED") ||
-              payload.includes("timeout")
-            ) {
-              log.error(`[${tabId}] CRITICAL: ${payload}`);
+      // ── Error listeners (claude + codex) ──
+      for (const eventName of ["claude-error", "codex-error"] as const) {
+        const unlisten = await listen<ClaudeErrorPayload>(
+          eventName,
+          (event) => {
+            if (!cancelled) {
+              const { tab_id: tabId, data: payload } = event.payload;
+              log.warn(`[${tabId}] stderr (${eventName}): ${payload}`);
+              if (
+                payload.includes("Error") ||
+                payload.includes("error") ||
+                payload.includes("ECONNREFUSED") ||
+                payload.includes("timeout")
+              ) {
+                log.error(`[${tabId}] CRITICAL: ${payload}`);
+              }
             }
-          }
-        },
-      );
-      if (cancelled) {
-        unlistenError();
-        return;
+          },
+        );
+        if (cancelled) { unlisten(); return; }
+        listenersRef.current.push(unlisten);
       }
-      listenersRef.current.push(unlistenError);
     })();
 
     return () => {

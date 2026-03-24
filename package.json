@@ -10,7 +10,7 @@
   ],
   "scripts": {
     "dev:web": "pnpm turbo dev --filter=@latex-labs/web --filter=@latex-labs/latex-api",
-    "dev:desktop": "pnpm --filter=@latex-labs/desktop-sidecar dev & pnpm --filter=@latex-labs/desktop tauri dev",
+    "dev:desktop": "pnpm --filter=@latex-labs/desktop tauri dev",
     "build:desktop": "pnpm --filter=@latex-labs/desktop tauri build",
     "lint": "pnpm exec biome check",
     "lint:fix": "pnpm exec biome check --fix",

@@ -6,6 +6,36 @@ import { createLogger } from "@/lib/debug/logger";
 
 const log = createLogger("claude");
 
+// ─── Provider / Model Constants ───
+
+export const claudeModels = [
+  { id: "sonnet", name: "Sonnet", desc: "Fast, efficient for most tasks" },
+  { id: "opus", name: "Opus", desc: "Most capable, complex reasoning" },
+  { id: "haiku", name: "Haiku", desc: "Fastest, simple tasks" },
+  { id: "opusplan", name: "OpusPlan", desc: "Opus for planning, Sonnet for execution" },
+] as const;
+
+export const codexModels = [
+  { id: "o3", name: "o3", desc: "Strongest reasoning model" },
+  { id: "o4-mini", name: "o4-mini", desc: "Fast, cost-effective" },
+  { id: "gpt-4.1", name: "GPT-4.1", desc: "General-purpose, balanced" },
+] as const;
+
+export type ClaudeModelId = (typeof claudeModels)[number]["id"];
+export type CodexModelId = (typeof codexModels)[number]["id"];
+
+function loadProvider(): "claude" | "codex" {
+  try {
+    const stored = localStorage.getItem("latexlabs-provider");
+    if (stored === "codex") return "codex";
+  } catch { /* ignore */ }
+  return "claude";
+}
+
+function defaultModelForProvider(provider: "claude" | "codex"): string {
+  return provider === "claude" ? "opus" : "o4-mini";
+}
+
 /** Convert a character offset to 1-based line:col */
 export function offsetToLineCol(
   content: string,
@@ -173,9 +203,13 @@ interface ClaudeChatState {
     imageDataUrl?: string;
   }[];
 
-  /** Currently selected model (passed per-prompt to Claude CLI) */
-  selectedModel: "sonnet" | "opus" | "haiku" | "opusplan";
-  setSelectedModel: (model: "sonnet" | "opus" | "haiku" | "opusplan") => void;
+  /** AI provider: Claude CLI or Codex CLI */
+  provider: "claude" | "codex";
+  setProvider: (p: "claude" | "codex") => void;
+
+  /** Currently selected model (passed per-prompt to the CLI) */
+  selectedModel: string;
+  setSelectedModel: (model: string) => void;
 
   /** Effort level for Opus 4.6 adaptive reasoning */
   effortLevel: "low" | "medium" | "high";
@@ -224,7 +258,13 @@ export const useClaudeChatStore = create<ClaudeChatState>()((set, get) => ({
   tabs: [makeDefaultTab(DEFAULT_TAB_ID)],
   activeTabId: DEFAULT_TAB_ID,
 
-  selectedModel: "opus",
+  provider: loadProvider(),
+  setProvider: (p) => {
+    try { localStorage.setItem("latexlabs-provider", p); } catch { /* ignore */ }
+    set({ provider: p, selectedModel: defaultModelForProvider(p) });
+  },
+
+  selectedModel: defaultModelForProvider(loadProvider()),
   setSelectedModel: (model) => set({ selectedModel: model }),
 
   effortLevel: "medium",
@@ -266,7 +306,7 @@ export const useClaudeChatStore = create<ClaudeChatState>()((set, get) => ({
     // Guard: prevent sending from a tab that's already streaming
     if (activeTab?.isStreaming) return;
 
-    const { sessionId, selectedModel, effortLevel } = state;
+    const { sessionId, selectedModel, effortLevel, provider } = state;
 
     const sendStart = performance.now();
     log.info("sendPrompt start", {
@@ -380,32 +420,51 @@ export const useClaudeChatStore = create<ClaudeChatState>()((set, get) => ({
     });
 
     try {
-      if (sessionId) {
-        // Resume existing session
-        await invoke("resume_claude_code", {
-          projectPath,
-          sessionId,
-          prompt,
-          tabId: activeTabId,
-          model: selectedModel,
-          effortLevel,
-        });
+      if (provider === "codex") {
+        // ── Codex CLI ──
+        if (sessionId) {
+          await invoke("continue_codex_code", {
+            projectPath,
+            sessionId,
+            prompt,
+            tabId: activeTabId,
+            model: selectedModel,
+          });
+        } else {
+          await invoke("execute_codex_code", {
+            projectPath,
+            prompt,
+            tabId: activeTabId,
+            model: selectedModel,
+          });
+        }
       } else {
-        // New session
-        await invoke("execute_claude_code", {
-          projectPath,
-          prompt,
-          tabId: activeTabId,
-          model: selectedModel,
-          effortLevel,
-        });
+        // ── Claude CLI (default) ──
+        if (sessionId) {
+          await invoke("resume_claude_code", {
+            projectPath,
+            sessionId,
+            prompt,
+            tabId: activeTabId,
+            model: selectedModel,
+            effortLevel,
+          });
+        } else {
+          await invoke("execute_claude_code", {
+            projectPath,
+            prompt,
+            tabId: activeTabId,
+            model: selectedModel,
+            effortLevel,
+          });
+        }
       }
       log.info(
-        `sendPrompt complete in ${(performance.now() - sendStart).toFixed(0)}ms`,
+        `sendPrompt complete (${provider}) in ${(performance.now() - sendStart).toFixed(0)}ms`,
       );
     } catch (err: any) {
       log.error(
-        `sendPrompt failed after ${(performance.now() - sendStart).toFixed(0)}ms`,
+        `sendPrompt failed (${provider}) after ${(performance.now() - sendStart).toFixed(0)}ms`,
         { error: String(err) },
       );
       set((s) =>

@@ -144,7 +144,7 @@ async fn execute_tool(
             } else {
                 safe_join(project_dir, dir)?
             };
-            let files = list_files_recursive(&root, "").await?;
+            let files = list_files_recursive(&root, "")?;
             Ok(serde_json::json!({ "files": files }).to_string())
         }
         "propose_patch" => {
@@ -445,18 +445,14 @@ fn safe_join(base: &Path, relative: &str) -> Result<PathBuf, String> {
 }
 
 /// Recursively list files in a directory, returning relative paths.
-async fn list_files_recursive(root: &Path, prefix: &str) -> Result<Vec<String>, String> {
+fn list_files_recursive(root: &Path, prefix: &str) -> Result<Vec<String>, String> {
     let mut files = Vec::new();
 
-    let mut entries = tokio::fs::read_dir(root)
-        .await
+    let entries = std::fs::read_dir(root)
         .map_err(|e| format!("Failed to read directory: {}", e))?;
 
-    while let Some(entry) = entries
-        .next_entry()
-        .await
-        .map_err(|e| format!("Failed to read entry: {}", e))?
-    {
+    for entry in entries {
+        let entry = entry.map_err(|e| format!("Failed to read entry: {}", e))?;
         let name = entry.file_name().to_string_lossy().to_string();
 
         // Skip hidden files/directories
@@ -472,11 +468,10 @@ async fn list_files_recursive(root: &Path, prefix: &str) -> Result<Vec<String>, 
 
         let file_type = entry
             .file_type()
-            .await
             .map_err(|e| format!("Failed to get file type: {}", e))?;
 
         if file_type.is_dir() {
-            let sub_files = list_files_recursive(&entry.path(), &rel_path).await?;
+            let sub_files = list_files_recursive(&entry.path(), &rel_path)?;
             files.extend(sub_files);
         } else {
             files.push(rel_path);

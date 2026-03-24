@@ -1,6 +1,7 @@
 mod agent;
 mod chart;
 mod claude;
+mod codex;
 mod collab;
 mod history;
 mod latex;
@@ -15,13 +16,6 @@ mod zotero;
 
 use std::path::Path;
 use tauri::{Emitter, Manager, WebviewUrl, WebviewWindowBuilder};
-
-/// Entry point for the `--tectonic-compile` subprocess mode.
-/// Runs tectonic compilation in an isolated process so that C-level global state
-/// (font cache, etc.) is cleaned up on exit, preventing assertion failures on retry.
-pub fn tectonic_compile_subprocess(work_dir: &Path, main_file: &str) -> Result<(), String> {
-    latex::compile_with_tectonic(work_dir, main_file)
-}
 
 // --- External editor detection & opening ---
 
@@ -331,6 +325,7 @@ pub fn run() {
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_process::init())
         .manage(claude::ClaudeProcessState::default())
+        .manage(codex::CodexProcessState::default())
         .manage(latex::LatexCompilerState::default())
         .manage(zotero::ZoteroOAuthState::default())
         .setup(|_app| Ok(()))
@@ -354,6 +349,12 @@ pub fn run() {
             claude::set_claude_fast_mode,
             claude::list_claude_sessions,
             claude::load_session_history,
+            codex::check_codex_status,
+            codex::execute_codex_code,
+            codex::continue_codex_code,
+            codex::cancel_codex_execution,
+            codex::codex_login,
+            codex::codex_logout,
             zotero::zotero_start_oauth,
             zotero::zotero_complete_oauth,
             zotero::zotero_cancel_oauth,
@@ -456,6 +457,14 @@ pub fn run() {
                 let state_clone = claude_state.inner().clone();
                 tauri::async_runtime::spawn(async move {
                     claude::kill_process_for_window(&state_clone, &label_clone).await;
+                });
+
+                // Kill Codex process associated with this window
+                let codex_state = app_handle.state::<codex::CodexProcessState>();
+                let label_clone2 = label.clone();
+                let codex_state_clone = codex_state.inner().clone();
+                tauri::async_runtime::spawn(async move {
+                    codex::kill_process_for_window(&codex_state_clone, &label_clone2).await;
                 });
 
                 // Quit the app when the last window is closed
